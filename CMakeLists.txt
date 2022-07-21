@@ -5,16 +5,19 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
-find_package(ament_cmake_auto REQUIRED)
-ament_auto_find_build_dependencies()
+find_package(unique_identifier_msgs)
+find_package(vision_msgs)
 
-file(GLOB SOURCE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg srv/*.srv)
+find_package(rosidl_default_generators REQUIRED)
+
+file(GLOB SOURCE_MSGS_SRVS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg srv/*.srv)
 rosidl_generate_interfaces(${PROJECT_NAME}
-  ${SOURCE}
+  ${SOURCE_MSGS_SRVS}
+  DEPENDENCIES
+    unique_identifier_msgs
+    vision_msgs
+  ADD_LINTER_TESTS
 )
-
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -25,6 +28,6 @@ if(BUILD_TESTING)
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+ament_export_dependencies(rosidl_default_runtime)
 
-ament_auto_package()
-
+ament_package()
