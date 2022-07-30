@@ -26,5 +26,9 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+
+ament_export_dependencies(vision_msgs)
+ament_export_dependencies(unique_identifier_msgs)
+
 ament_auto_package()
 
