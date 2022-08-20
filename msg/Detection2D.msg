@@ -12,4 +12,4 @@ vision_msgs/BoundingBox2D bbox
 
 # Class probabilities
 string label_id
-float score
+float64 score
