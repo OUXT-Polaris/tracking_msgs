@@ -11,5 +11,5 @@ unique_identifier_msgs/UUID detection_id
 vision_msgs/BoundingBox2D bbox
 
 # Class probabilities
-#vision_msgs/ObjectHypothesisWithPose[] results
-#string label_id
+string label_id
+float64 score
