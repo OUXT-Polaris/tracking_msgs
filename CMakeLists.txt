@@ -12,6 +12,7 @@ ament_auto_find_build_dependencies()
 file(GLOB SOURCE RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} msg/*.msg srv/*.srv)
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${SOURCE}
+  DEPENDENCIES builtin_interfaces std_msgs vision_msgs unique_identifier_msgs
 )
 
 
