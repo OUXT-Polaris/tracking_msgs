@@ -9,7 +9,8 @@ std_msgs/Header header
 unique_identifier_msgs/UUID tracking_id
 # 2D bounding box surrounding the object.
 vision_msgs/BoundingBox2D bbox
+vision_msgs/BoundingBox3D[<=1] bbox_3d
 
 # Class probabilities
-#vision_msgs/ObjectHypothesisWithPose[] results
-#string label_id
+string label
+float64 score
