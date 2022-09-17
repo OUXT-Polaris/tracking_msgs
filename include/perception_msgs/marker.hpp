@@ -15,15 +15,20 @@
 #ifndef PERCEPTION_MSGS__MARKER_HPP_
 #define PERCEPTION_MSGS__MARKER_HPP_
 
+#include <image_geometry/pinhole_camera_model.h>
+
 #include <color_names/color_names.hpp>
 #include <perception_msgs/msg/detection2_d_array.hpp>
+#include <sensor_msgs/msg/camera_info.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
 visualization_msgs::msg::MarkerArray toMarker(
   const std::vector<perception_msgs::msg::Detection2D> & detections, const rclcpp::Time & now,
-  const std::string & camera_optical_frame, const std::string & detection_color = "limegreen",
-  const std::string & frustum_color = "cyan")
+  const std::string & camera_optical_frame, const sensor_msgs::msg::CameraInfo & camera_info,
+  const std::string & detection_color = "limegreen", const std::string & frustum_color = "cyan")
 {
+  image_geometry::PinholeCameraModel camera_model;
+  camera_model.fromCameraInfo(camera_info);
   visualization_msgs::msg::MarkerArray marker;
   visualization_msgs::msg::Marker frustum_marker;
   frustum_marker.header.stamp = now;
@@ -40,21 +45,21 @@ visualization_msgs::msg::MarkerArray toMarker(
   point_origin.x = 0;
   point_origin.y = 0;
   point_origin.z = 0;
-  cv::Point3d point_lu = cam_model_.projectPixelTo3dRay(cv::Point2d(0, 0));
+  cv::Point3d point_lu = camera_model.projectPixelTo3dRay(cv::Point2d(0, 0));
   geometry_msgs::msg::Point point_lu_msg;
   point_lu_msg.x = point_lu.x;
   point_lu_msg.y = point_lu.y;
   point_lu_msg.z = point_lu.z;
   frustum_marker.points.emplace_back(point_origin);
   frustum_marker.points.emplace_back(point_lu_msg);
-  cv::Point3d point_ru = cam_model_.projectPixelTo3dRay(cv::Point2d(horizontal_pixels_, 0));
+  cv::Point3d point_ru = camera_model.projectPixelTo3dRay(cv::Point2d(camera_info.width, 0));
   geometry_msgs::msg::Point point_ru_msg;
   point_ru_msg.x = point_ru.x;
   point_ru_msg.y = point_ru.y;
   point_ru_msg.z = point_ru.z;
   frustum_marker.points.emplace_back(point_origin);
   frustum_marker.points.emplace_back(point_ru_msg);
-  cv::Point3d point_lb = cam_model_.projectPixelTo3dRay(cv::Point2d(0, vertical_pixels_));
+  cv::Point3d point_lb = camera_model.projectPixelTo3dRay(cv::Point2d(0, camera_info.height));
   geometry_msgs::msg::Point point_lb_msg;
   point_lb_msg.x = point_lb.x;
   point_lb_msg.y = point_lb.y;
@@ -62,7 +67,7 @@ visualization_msgs::msg::MarkerArray toMarker(
   frustum_marker.points.emplace_back(point_origin);
   frustum_marker.points.emplace_back(point_lb_msg);
   cv::Point3d point_rb =
-    cam_model_.projectPixelTo3dRay(cv::Point2d(horizontal_pixels_, vertical_pixels_));
+    camera_model.projectPixelTo3dRay(cv::Point2d(camera_info.width, camera_info.height));
   geometry_msgs::msg::Point point_rb_msg;
   point_rb_msg.x = point_rb.x;
   point_rb_msg.y = point_rb.y;
@@ -96,7 +101,7 @@ visualization_msgs::msg::MarkerArray toMarker(
     cv::Point2d point_lu_obj(
       detection.bbox.center.x - detection.bbox.size_x * 0.5,
       detection.bbox.center.y - detection.bbox.size_y * 0.5);
-    cv::Point3d lu_ray = cam_model_.projectPixelTo3dRay(point_lu_obj);
+    cv::Point3d lu_ray = camera_model.projectPixelTo3dRay(point_lu_obj);
     geometry_msgs::msg::Point point_lu_obj_msg;
     point_lu_obj_msg.x = lu_ray.x;
     point_lu_obj_msg.y = lu_ray.y;
@@ -104,7 +109,7 @@ visualization_msgs::msg::MarkerArray toMarker(
     cv::Point2d point_ru_point(
       detection.bbox.center.x + detection.bbox.size_x * 0.5,
       detection.bbox.center.y - detection.bbox.size_y * 0.5);
-    cv::Point3d ru_ray = cam_model_.projectPixelTo3dRay(point_ru_point);
+    cv::Point3d ru_ray = camera_model.projectPixelTo3dRay(point_ru_point);
     geometry_msgs::msg::Point point_ru_obj_msg;
     point_ru_obj_msg.x = ru_ray.x;
     point_ru_obj_msg.y = ru_ray.y;
@@ -112,7 +117,7 @@ visualization_msgs::msg::MarkerArray toMarker(
     cv::Point2d point_rb_point(
       detection.bbox.center.x + detection.bbox.size_x * 0.5,
       detection.bbox.center.y + detection.bbox.size_y * 0.5);
-    cv::Point3d rb_ray = cam_model_.projectPixelTo3dRay(point_rb_point);
+    cv::Point3d rb_ray = camera_model.projectPixelTo3dRay(point_rb_point);
     geometry_msgs::msg::Point point_rb_obj_msg;
     point_rb_obj_msg.x = rb_ray.x;
     point_rb_obj_msg.y = rb_ray.y;
@@ -120,7 +125,7 @@ visualization_msgs::msg::MarkerArray toMarker(
     cv::Point2d point_lb_point(
       detection.bbox.center.x - detection.bbox.size_x * 0.5,
       detection.bbox.center.y + detection.bbox.size_y * 0.5);
-    cv::Point3d lb_ray = cam_model_.projectPixelTo3dRay(point_lb_point);
+    cv::Point3d lb_ray = camera_model.projectPixelTo3dRay(point_lb_point);
     geometry_msgs::msg::Point point_lb_obj_msg;
     point_lb_obj_msg.x = lb_ray.x;
     point_lb_obj_msg.y = lb_ray.y;
