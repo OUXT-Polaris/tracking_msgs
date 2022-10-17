@@ -9,6 +9,8 @@ std_msgs/Header header
 unique_identifier_msgs/UUID detection_id
 # 2D bounding box surrounding the object.
 vision_msgs/BoundingBox2D bbox
+
+std_msgs/Header[<=1] bbox_3d_header
 vision_msgs/BoundingBox3D[<=1] bbox_3d
 
 # Class probabilities
